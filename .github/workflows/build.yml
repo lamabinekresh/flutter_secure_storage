@@ -1,0 +1,39 @@
+name: Build and SonarQube Analysis
+
+on:
+  push:
+    branches:
+      - develop  # Trigger on push to develop branch
+  pull_request:
+    types: [opened, synchronize, reopened]  # Trigger for pull request events
+
+jobs:
+  sonarqube:
+    name: SonarQube Analysis
+    runs-on: macos-latest  # You can choose macOS, ubuntu, or windows based on your preference
+
+    steps:
+      # Step to check out the repository code
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensure a full history for better relevancy of analysis
+
+      # Step to set up Flutter (if needed for your analysis)
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'  # You can change to the version you want
+
+      # Step to install Flutter dependencies (optional but recommended for Flutter apps)
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Step to run the SonarQube analysis
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  # Using the SONAR_TOKEN secret created earlier
+
+      # Optional step to run tests (for Flutter apps)
+      - name: Run Tests
+        run: flutter test  # If you want to run tests during the CI process
